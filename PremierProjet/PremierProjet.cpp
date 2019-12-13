@@ -50,6 +50,9 @@ mat4 scaleMat;
 mat4 translationMat;
 mat4 perspectiveProjectionMatrix;
 
+std::vector<Vertex> vertices;
+std::vector<uint32_t> indices;
+
 bool Initialize()
 {
 	GLenum error = glewInit();
@@ -70,12 +73,11 @@ bool Initialize()
 	uint32_t basicProgram = g_BasicShader.GetProgram();
 	glUseProgram(basicProgram);
 
-	/*std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
+	
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
-	std::string wn, err;*/
+	std::string wn, err;
 
 	Vector2 v(2, 2);
 	Vector2 v1(1, 4);
@@ -85,17 +87,23 @@ bool Initialize()
 	std::cout << "Y = " << v.get_y() << std::endl;
 	
 
-	//if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &wn, &err, "data/icosahedron.obj"))
-	//	throw std::runtime_error(wn + err);
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &wn, &err, "../data/suzanne.obj"))
+		throw std::runtime_error(wn + err);
 
-	//for (const auto& shape : shapes) {
-	//	for (const auto& index : shape.mesh.indices) {
-	//		Vertex vertex = {};
+	for (const auto& shape : shapes) {
+		for (const auto& index : shape.mesh.indices) {
+			Vertex vertex = {};
+			vertex.x = attrib.vertices[3 * index.vertex_index + 0];
+			vertex.y = attrib.vertices[3 * index.vertex_index + 1];
+			vertex.z = attrib.vertices[3 * index.vertex_index + 2];
 
-	//		vertices.push_back(vertex);
-	//		indices.push_back(indices.size());
-	//	}
-	//}
+			vertex.r = vertex.x;
+			vertex.g = vertex.y;
+			vertex.b = vertex.z;
+			vertices.push_back(vertex);
+			indices.push_back(indices.size());
+		}
+	}
 
 
 	// Define vertex positions and color
@@ -111,8 +119,11 @@ bool Initialize()
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// Fill the Buffer with the vertex array datas
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
-	
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+	// Loader : sizeof(Vertex) * vertices.size(), &vertices[0]
+
+
 	// Define location attribute
 	int location = glGetAttribLocation(basicProgram, "a_position");
 	glEnableVertexAttribArray(location);
@@ -121,22 +132,24 @@ bool Initialize()
 	// Define color attribute
 	int color = glGetAttribLocation(basicProgram, "a_color");
 	glEnableVertexAttribArray(color);
-	glVertexAttribPointer(color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
-
+	//glVertexAttribPointer(color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
+	glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
+	// Loader : color, 3, sizeof(Vertex), offsetof(Vertex, r)
 	
 
 
-	// Define indices datas
-	static const GLuint indices[] = {
-		0,1,2
-	};
+	 //Define indices datas
+	//static const GLuint indices[] = {
+	//	0,1,2
+	//};
 
 	// Create and Bind Index Buffer Object
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	// Fill the buffer with the indices array datas
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), &indices[0], GL_STATIC_DRAW);
+	// Loader : sizeof(&indices), &indices[0]
 
 	// Lock Buffers
 	glBindVertexArray(0);
@@ -161,11 +174,12 @@ bool Initialize()
 void Terminate() {
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &IBO);
+	glDeleteBuffers(1, &VAO);
 	g_BasicShader.Destroy();
-	delete(matrix.data);
-	delete(scaleMat.data);
-	delete(translationMat.data);
-	delete(perspectiveProjectionMatrix.data);
+	delete[](matrix.data);
+	delete[](scaleMat.data);
+	delete[](translationMat.data);
+	delete[](perspectiveProjectionMatrix.data);
 }
 
 void Shutdown()
@@ -219,7 +233,7 @@ void Render(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	float near = -1.f;
-	float far = 1.f;
+	float far = 100.f;
 	float right = 640;
 	float left = 0;
 	float top = 0;
@@ -234,9 +248,9 @@ void Render(GLFWwindow* window)
 	glUniform1f(timeLocation, currentTime);
 
 
-	scaleMat.scale(300);
+	scaleMat.scale(150);
 	matrix.rotate(currentTime);
-	translationMat.translate(250, -250, -0);
+	translationMat.translate(250, -250, -5);
 	perspectiveProjectionMatrix.orthographique(left, right, bottom, top, near, far);
 	int matLocation = glGetUniformLocation(basicProgram, "u_matrix");
 	glUniformMatrix4fv(matLocation, 1, false, scaleMat.data);
@@ -253,7 +267,9 @@ void Render(GLFWwindow* window)
 
 	// Render Vertex Array 
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+	//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	// 
 }
 
 

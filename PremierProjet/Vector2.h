@@ -46,11 +46,11 @@ public:
 		this->y = yValue;
 	}
 
-	Vector2& operator + (const Vector2 v) {
+	Vector2 operator + (const Vector2& v) {
 		return Vector2(this->x + v.get_x(), this->y + v.get_y());
 	}
 
-	Vector2& operator - (const Vector2 v) {
+	Vector2 operator - (const Vector2& v) {
 		return Vector2(this->x - v.get_x(), this->y - v.get_y());
 	}
 };

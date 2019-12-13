@@ -1,0 +1,12 @@
+﻿  PremierProjet.cpp
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(104,36): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(104,36): warning C4267:         with
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(104,36): warning C4267:         [
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(104,36): warning C4267:             _Ty=unsigned int
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(104,36): warning C4267:         ]
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(179,23): warning C4154: deletion of an array expression; conversion to pointer supplied
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(180,25): warning C4154: deletion of an array expression; conversion to pointer supplied
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(181,31): warning C4154: deletion of an array expression; conversion to pointer supplied
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(182,44): warning C4154: deletion of an array expression; conversion to pointer supplied
+C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\PremierProjet\PremierProjet.cpp(271,65): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  PremierProjet.vcxproj -> C:\cantetf\Repos\Perso\Repos\Backup\OpenGL_ObjLoader\x64\Debug\PremierProjet.exe
