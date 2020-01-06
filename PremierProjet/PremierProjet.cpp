@@ -120,11 +120,13 @@ void LoadModel(std::string modelPath) {
 			vertex.g = vertex.y;
 			vertex.b = vertex.z;
 
+
 			
 
 			// Check if vertex already exist and fill buffer
 			CheckVertex(vertex);
 		}
+		
 	}
 }
 bool Initialize()
@@ -163,7 +165,7 @@ bool Initialize()
 	glUseProgram(basicProgram);
 
 	// Load Models and fill buffers
-	LoadModel("../data/export.obj");
+	LoadModel("../data/Export.obj");
 
 	// Test to load multiple object in same buffer
 	//LoadModel("../data/icosahedron.obj");
@@ -328,8 +330,9 @@ void Render(GLFWwindow* window)
 
 	scaleMat.scale(1);
 	//matrix.rotate(currentTime);
-	matrix.setUpRotationMatrix(currentTime * 20, 0.f, 40.f, 0.f);
-	translationMat.translate(0, 0, -5);
+	//matrix.setUpRotationMatrix(currentTime * 10, 0, 0, 0.f);
+	matrix.setUpRotationMatrix(45.0, -currentTime * 20, 0, 0.f);
+	translationMat.translate(0, 0.0, -4);
 	//perspectiveProjectionMatrix.orthographique(left, right, bottom, top, near, far);
 	//perspectiveProjectionMatrix.orthogra_aphique(left, right, bottom, top, near, far);
 	perspectiveProjectionMatrix.perspective(fov, aspect, near, far);
