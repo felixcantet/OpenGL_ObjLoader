@@ -20,8 +20,11 @@ void main(void)
 	v_color = vec4(a_color, 1.0);
 	
 	v_texcoords = a_texcoords;
+	mat4 worldMatrix = u_translateMatrix * u_rotMatrix;
+	mat3 normalMat = transpose(inverse(worldMatrix));
+										//                WORLD MATRIX			//
 	gl_Position = u_projectionMatrix * u_translateMatrix * u_rotMatrix* u_matrix * vec4(a_position, 1.0);
 	//v_normals = vec4(a_normals, 1.0);
-	v_normals = a_normals;
+	v_normals = normalMat * a_normals;
 	v_pos = gl_Position;
 }

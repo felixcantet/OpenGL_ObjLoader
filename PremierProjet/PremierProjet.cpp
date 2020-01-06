@@ -41,7 +41,7 @@
 #include "tiny_obj_loader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../stb/stb_image.h"
+#include "../stb/stb_image.h"#include "Material.h"
 
 GLShader g_BasicShader;
 GLuint VAO;
@@ -53,6 +53,8 @@ mat4 matrix;
 mat4 scaleMat;
 mat4 translationMat;
 mat4 perspectiveProjectionMatrix;
+
+Material material;
 
 // List of computed vertices
 std::vector<Vertex> vertices;
@@ -67,9 +69,9 @@ void CheckVertex(Vertex &v)
 		if (v.x == vertices.at(i).x)
 			if (v.y == vertices.at(i).y)
 				if (v.z == vertices.at(i).z)
-					if(v.r == vertices.at(i).r)
-						if(v.g == vertices.at(i).g)
-							if(v.b == vertices.at(i).b)
+					if (v.r == vertices.at(i).r)
+						if (v.g == vertices.at(i).g)
+							if (v.b == vertices.at(i).b)
 								if (v.nx == vertices.at(i).nx)
 									if (v.ny == vertices.at(i).ny)
 										if (v.nz == vertices.at(i).nz)
@@ -91,7 +93,7 @@ void LoadModel(std::string modelPath) {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string wn, err;
-	
+
 	// Load file datas
 	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &wn, &err, modelPath.c_str()))
 		throw std::runtime_error(wn + err);
@@ -101,31 +103,55 @@ void LoadModel(std::string modelPath) {
 		for (const auto& index : shape.mesh.indices) {
 			Vertex vertex = {};
 			// read position
-			vertex.x = attrib.vertices[3 * index.vertex_index + 0];
-			vertex.y = attrib.vertices[3 * index.vertex_index + 1];
-			vertex.z = attrib.vertices[3 * index.vertex_index + 2];
+			if (attrib.vertices.size() > 0) {
+				vertex.x = attrib.vertices[3 * index.vertex_index + 0];
+				vertex.y = attrib.vertices[3 * index.vertex_index + 1];
+				vertex.z = attrib.vertices[3 * index.vertex_index + 2];
+			}
 
 			// read normals
-			vertex.nx = attrib.normals[3 * index.normal_index + 0];
-			vertex.ny = attrib.normals[3 * index.normal_index + 1];
-			vertex.nz = attrib.normals[3 * index.normal_index + 2];
+			if (attrib.normals.size() > 0) {
+				vertex.nx = attrib.normals[3 * index.normal_index + 0];
+				vertex.ny = attrib.normals[3 * index.normal_index + 1];
+				vertex.nz = attrib.normals[3 * index.normal_index + 2];
+			}
 
-			// read texcoord. 
-			// TODO : Integrate texcoord and textures
-			vertex.u = attrib.texcoords[2 * index.texcoord_index + 0];
-			vertex.v = 1 - attrib.texcoords[2 * index.texcoord_index + 1];
+			if (attrib.texcoords.size() > 0) {
+				vertex.u = attrib.texcoords[2 * index.texcoord_index + 0];
+				vertex.v = 1 - attrib.texcoords[2 * index.texcoord_index + 1];
+			}
 
 			// Use position as color
 			vertex.r = vertex.x;
 			vertex.g = vertex.y;
 			vertex.b = vertex.z;
 
-			
+
 
 			// Check if vertex already exist and fill buffer
 			CheckVertex(vertex);
 		}
+		printf("# of materials = %d\n", (int)materials.size());
 	}
+
+	/* material
+		materials.at(0).diffuse[0],
+		materials.at(0).diffuse[1],
+		materials.at(0).diffuse[2],
+		materials.at(0).specular[0],
+		materials.at(0).specular[1],
+		materials.at(0).specular[2],
+		materials.at(0).shininess);*/
+
+	material.diffuse_r = materials.at(0).diffuse[0];
+	material.diffuse_g = materials.at(0).diffuse[1];
+	material.diffuse_b = materials.at(0).diffuse[2];
+	
+	material.specular_r = materials.at(0).specular[0];
+	material.specular_g = materials.at(0).specular[1];
+	material.specular_b = materials.at(0).specular[2];
+	material.shininess = materials.at(0).shininess;
+
 }
 bool Initialize()
 {
@@ -153,7 +179,7 @@ bool Initialize()
 		stbi_image_free(data);
 	}
 	glActiveTexture(GL_TEXTURE0);
-	
+
 	// Create and define shader programs
 	g_BasicShader.LoadVertexShader("BasicVertex.vs");
 	g_BasicShader.LoadFragmentShader("BasicFragment.fs");
@@ -166,7 +192,7 @@ bool Initialize()
 	LoadModel("../data/export.obj");
 
 	// Test to load multiple object in same buffer
-	//LoadModel("../data/icosahedron.obj");
+	//LoadModel("../data/suzanne.obj");
 
 	// Define vertex positions and color
 	static const Vertex vertex[3] =
@@ -186,9 +212,15 @@ bool Initialize()
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 	// Loader : sizeof(Vertex) * vertices.size(), &vertices[0]
-	auto textureLocation = glGetAttribLocation(basicProgram, "u_sampler");
+	auto textureLocation = glGetAttribLocation(basicProgram, "u_material.diffuse");
 	glUniform1i(textureLocation, 1);
 	//glVertexAttribPointer 
+
+	auto specularLocation = glGetAttribLocation(basicProgram, "u_material.specular");
+	glUniform3f(specularLocation, material.specular_r, material.specular_g, material.specular_b);
+
+	auto shininessLocation = glGetAttribLocation(basicProgram, "u_material.shininess");
+	glUniform1f(shininessLocation, material.shininess);
 
 	int texCoords = glGetAttribLocation(basicProgram, "a_texcoords");
 	glEnableVertexAttribArray(texCoords);

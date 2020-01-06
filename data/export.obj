@@ -1,6 +1,6 @@
 # Blender v2.80 (sub 60) OBJ File: ''
 # www.blender.org
-mtllib export.mtl
+mtllib ../data/export.mtl
 o Suzanne
 v 0.437500 0.164062 0.765625
 v -0.437500 0.164062 0.765625
