@@ -1,7 +1,39 @@
 //
 //
 //
+struct Material {
+	float spec_r;
+	float spec_g;
+	float spec_b;
 
+	float ambiant_r;
+	float ambiant_g;
+	float ambiant_b;
+
+
+	float shininess;
+	
+};
+
+struct Light {
+	float dir_x;
+	float dir_y;
+	float dir_z;
+
+	float ambiant_r;
+	float ambiant_g;
+	float ambiant_b;
+
+	float diffuse_r;
+	float diffuse_g;
+	float diffuse_b;
+
+	float spec_r;
+	float spec_g;
+	float spec_b;
+
+	float intensity;
+};
 // GLEW_STATIC force le linkage statique
 // c-a-d que le code de glew est directement injecte dans l'executable
 #define GLEW_STATIC
@@ -10,6 +42,7 @@
 #include "Vertex.h"
 #include "Mat4.h"
 #include "Vector2.h"
+//#include "Material.h"
 
 // les repertoires d'includes sont:
 // ../libs/glfw-3.3/include			fenetrage
@@ -41,7 +74,7 @@
 #include "tiny_obj_loader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../stb/stb_image.h"#include "Material.h"
+#include "../stb/stb_image.h"
 
 GLShader g_BasicShader;
 GLuint VAO;
@@ -54,12 +87,12 @@ mat4 scaleMat;
 mat4 translationMat;
 mat4 perspectiveProjectionMatrix;
 
-Material material;
 
 // List of computed vertices
 std::vector<Vertex> vertices;
 // List of computed indices
 std::vector<uint32_t> indices;
+Material mat;
 
 // Possible Optimization 
 void CheckVertex(Vertex &v)
@@ -143,14 +176,15 @@ void LoadModel(std::string modelPath) {
 		materials.at(0).specular[2],
 		materials.at(0).shininess);*/
 
-	material.diffuse_r = materials.at(0).diffuse[0];
-	material.diffuse_g = materials.at(0).diffuse[1];
-	material.diffuse_b = materials.at(0).diffuse[2];
+	mat.spec_r = materials.at(0).diffuse[0];
+	mat.spec_g = materials.at(0).diffuse[1];
+	mat.spec_b = materials.at(0).diffuse[2];
 	
-	material.specular_r = materials.at(0).specular[0];
-	material.specular_g = materials.at(0).specular[1];
-	material.specular_b = materials.at(0).specular[2];
-	material.shininess = materials.at(0).shininess;
+	mat.ambiant_r= materials.at(0).specular[0];
+	mat.ambiant_g = materials.at(0).specular[1];
+	mat.ambiant_b = materials.at(0).specular[2];
+
+	mat.shininess = materials.at(0).shininess;
 
 }
 bool Initialize()
@@ -203,7 +237,23 @@ bool Initialize()
 
 	};
 
+	Light light = {};
+	light.ambiant_r = 0.4;
+	light.ambiant_g = 0.2;
+	light.ambiant_b = 0.25;
 
+	light.diffuse_r = 0.8;
+	light.diffuse_g = 0.8;
+	light.diffuse_b = 0.8;
+	light.dir_x = 1;
+	light.dir_y = -1;
+	light.dir_z = 0.5;
+
+	light.spec_r = 0.2;
+	light.spec_g = 0.6;
+	light.spec_b = 0.2;
+
+	light.intensity = 1;
 
 	// Generate and bind the Vertex Buffer Object
 	glGenBuffers(1, &VBO);
@@ -217,10 +267,29 @@ bool Initialize()
 	//glVertexAttribPointer 
 
 	auto specularLocation = glGetAttribLocation(basicProgram, "u_material.specular");
-	glUniform3f(specularLocation, material.specular_r, material.specular_g, material.specular_b);
+	glUniform3f(specularLocation, mat.spec_r, mat.spec_g, mat.spec_b);
+
+	auto ambiantLocation = glGetAttribLocation(basicProgram, "u_material.ambiant");
+	glUniform3f(ambiantLocation, mat.ambiant_r, mat.ambiant_g, mat.ambiant_b);
 
 	auto shininessLocation = glGetAttribLocation(basicProgram, "u_material.shininess");
-	glUniform1f(shininessLocation, material.shininess);
+	glUniform1f(shininessLocation, mat.shininess);
+
+
+	auto lightSpecularLocation = glGetAttribLocation(basicProgram, "u_light.specular");
+	glUniform3f(lightSpecularLocation, light.spec_r, light.spec_g, light.spec_b);
+
+	auto lightAmbiantLocation = glGetAttribLocation(basicProgram, "u_light.ambiant");
+	glUniform3f(lightAmbiantLocation, light.ambiant_r, light.ambiant_g, light.ambiant_b);
+
+	auto lightDiffuseLocation = glGetAttribLocation(basicProgram, "u_light.diffuse");
+	glUniform3f(lightDiffuseLocation, light.diffuse_r, light.diffuse_r, light.diffuse_r);
+
+	auto lightDirectionLocation = glGetAttribLocation(basicProgram, "u_light.direction");
+	glUniform3f(lightDirectionLocation, light.dir_x, light.dir_x, light.dir_x);
+
+	auto lightIntensityLocation = glGetAttribLocation(basicProgram, "u_light.intensity");
+	glUniform1f(lightIntensityLocation, light.intensity);
 
 	int texCoords = glGetAttribLocation(basicProgram, "a_texcoords");
 	glEnableVertexAttribArray(texCoords);

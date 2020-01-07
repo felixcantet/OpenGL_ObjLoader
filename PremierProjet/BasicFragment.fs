@@ -19,7 +19,6 @@ varying vec3 v_normals;
 varying vec3 v_pos;
 
 uniform sampler2D u_sampler;
-uniform vec3 viewPos;
 uniform DirectionalLight u_light;
 uniform Material u_material;
 
@@ -31,8 +30,8 @@ void main(void) {
 	u_light.ambiant = vec3(0.3, 0.255, 0.336);
 	u_light.diffuse = vec3(1.0, 1.0, 1.0);
 	u_light.specular = vec3(1.0, 0.0, 0.0);
-	//u_material.specular = 1.0;
-	//u_material.shininess = 32;
+	u_material.specular = 1.0;
+	u_material.shininess = 32;
 	vec3 lightDir = normalize(-u_light.direction);
 
 	// Ambiant

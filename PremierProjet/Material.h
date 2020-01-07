@@ -1,5 +1,7 @@
 #pragma once
+
 struct Material {
+
 	float specular_r;
 	float specular_g;
 	float specular_b;
@@ -9,8 +11,4 @@ struct Material {
 	float diffuse_b;
 
 	float shininess;
-
-	Material() {
-
-	}
 };
